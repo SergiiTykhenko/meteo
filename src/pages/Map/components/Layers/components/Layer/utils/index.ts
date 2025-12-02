@@ -34,6 +34,7 @@ const linePaint = {
 export const getLayerPaint = (
   type: "isigmet" | "airsigmet",
   isHovered: boolean,
+  isSelected: boolean,
   isVisible: boolean
 ) => {
   if (!isVisible) {
@@ -41,7 +42,7 @@ export const getLayerPaint = (
       "fill-opacity": 0,
     };
   }
-  if (isHovered) {
+  if (isHovered || isSelected) {
     return hoverPaint[type];
   }
   return layerPaint[type];

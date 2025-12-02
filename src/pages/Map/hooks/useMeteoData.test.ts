@@ -3,14 +3,12 @@ import { renderHook, waitFor, act } from "@testing-library/react";
 import useMeteoData from "./useMeteoData";
 import type { ISigmetFeatures, AirSigmetFeatures } from "@/schemas";
 
-// Mock useSnackbars
 const mockAddSnackbar = vi.fn();
 vi.mock("@/hooks/useSnackbars/useSnackbars", () => ({
   __esModule: true,
   default: () => mockAddSnackbar,
 }));
 
-// Mock schemas
 vi.mock("@/schemas", async () => {
   const actual = await vi.importActual("@/schemas");
   return {
@@ -37,6 +35,7 @@ describe("useMeteoData", () => {
   it("should fetch data on mount", async () => {
     const mockIsigmetData: ISigmetFeatures = [
       {
+        id: "1",
         type: "Feature",
         properties: { rawSigmet: "SIGMET-1" },
         geometry: {
@@ -48,6 +47,7 @@ describe("useMeteoData", () => {
 
     const mockAirsigmetData: AirSigmetFeatures = [
       {
+        id: "2",
         type: "Feature",
         properties: { rawSigmet: "AIRSIGMET-1" },
         geometry: {
@@ -104,12 +104,10 @@ describe("useMeteoData", () => {
 
     const { result } = renderHook(() => useMeteoData());
 
-    // Wait for initial fetch
     await waitFor(() => {
       expect(result.current.isLoading).toBe(false);
     });
 
-    // Change filters
     act(() => {
       result.current.handleFiltersChange({
         levelFrom: "12000",
@@ -176,7 +174,6 @@ describe("useMeteoData", () => {
       call[0]?.toString().includes("/api/airsigmet")
     );
 
-    // Check the last call (after filter change)
     expect(isigmetCalls[isigmetCalls.length - 1]?.[0]).toContain(
       "hoursChange=6"
     );
@@ -210,7 +207,6 @@ describe("useMeteoData", () => {
   });
 
   it("should handle invalid data schema and show snackbar", async () => {
-    // Temporarily override the schema mock to fail validation
     const schemasModule = await import("@/schemas");
     const originalSafeParse = schemasModule.ISigmetFeaturesSchema.safeParse;
 
@@ -247,7 +243,6 @@ describe("useMeteoData", () => {
       type: "error",
     });
 
-    // Restore original
     schemasModule.ISigmetFeaturesSchema.safeParse = originalSafeParse;
   });
 
@@ -297,7 +292,6 @@ describe("useMeteoData", () => {
       call[0]?.toString().includes("/api/isigmet")
     );
 
-    // Check the last call (after filter change)
     const lastIsigmetCall = isigmetCalls[isigmetCalls.length - 1]?.[0];
     expect(lastIsigmetCall).toContain("levelFrom=12000");
     expect(lastIsigmetCall).toContain("levelTo=24000");
@@ -306,7 +300,7 @@ describe("useMeteoData", () => {
 
   it("should return empty arrays on initial render", () => {
     (globalThis.fetch as ReturnType<typeof vi.fn>).mockImplementation(
-      () => new Promise(() => {}) // Never resolves
+      () => new Promise(() => {})
     );
 
     const { result } = renderHook(() => useMeteoData());

@@ -23,6 +23,7 @@ const GeometrySchema = z.object({
 });
 
 export const ISigmetFeatureSchema = z.object({
+  id: z.string(),
   type: z.literal("Feature"),
   properties: ISigmetPropertiesSchema,
   geometry: GeometrySchema,
@@ -52,6 +53,7 @@ const AirSigmetPropertiesSchema = z.object({
 });
 
 export const AirSigmetFeatureSchema = z.object({
+  id: z.string(),
   type: z.literal("Feature"),
   properties: AirSigmetPropertiesSchema,
   geometry: GeometrySchema,

@@ -1,24 +1,9 @@
 import { Router, type Request } from "express";
 import _ from "lodash";
 import { addHours } from "date-fns";
-import {
-  schemaByType,
-  type ISigmetFeature,
-  type AirSigmetFeature,
-} from "./schemas.js";
-
-interface Cache {
-  initialisedAt: number | null;
-  dataByUrl: Record<string, ISigmetFeature[] | AirSigmetFeature[]>;
-}
-
-export const cache: Cache = {
-  initialisedAt: null,
-  dataByUrl: {},
-};
-
-// 1 hour
-const CACHE_TTL = 1000 * 60 * 60;
+import { generateHashId } from "./utils.js";
+import { schemaByType } from "../schemas.js";
+import { cacheData, getCachedData } from "../utils/cache.js";
 
 const router = Router();
 
@@ -28,19 +13,6 @@ interface Filters {
   level?: string;
   hoursChange?: string;
 }
-
-const getCachedData = (cacheKey: string) => {
-  if (cache.initialisedAt) {
-    const isCacheExpired = Date.now() - cache.initialisedAt > CACHE_TTL;
-
-    if (isCacheExpired) {
-      cache.initialisedAt = null;
-      cache.dataByUrl = {};
-    } else if (cache.dataByUrl[cacheKey]) {
-      return cache.dataByUrl[cacheKey];
-    }
-  }
-};
 
 const getUrl = (type: DataType, filters: Filters) => {
   let query = filters.level ? `&level=${filters.level}` : "";
@@ -80,13 +52,14 @@ const fetchWeatherData = async (type: DataType, filters: Filters) => {
 
   const { features } = parsedData.data;
 
-  if (!cache.initialisedAt) {
-    cache.initialisedAt = Date.now();
-  }
+  const featuresWithId = features.map((feature) => ({
+    ...feature,
+    id: generateHashId(feature.properties),
+  }));
 
-  cache.dataByUrl[cacheKey] = features;
+  cacheData(cacheKey, featuresWithId);
 
-  return features;
+  return featuresWithId;
 };
 
 const getLevelsToFetch = (levelFrom: string, levelTo: string) => {
@@ -133,9 +106,10 @@ const getMeteoData = async (req: Request, type: "isigmet" | "airsigmet") => {
     );
 
     const flattenedData = data.flat();
-    responseData = _.uniqBy(flattenedData, "properties.rawSigmet");
+    responseData = _.uniqBy(flattenedData, "id");
   } else {
-    responseData = await fetchWeatherData(type, filters);
+    const data = await fetchWeatherData(type, filters);
+    responseData = _.uniqBy(data, "id");
   }
 
   return responseData;

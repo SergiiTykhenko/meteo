@@ -2,19 +2,17 @@ import { Box, Typography, IconButton } from "@mui/material";
 import { red, blue, grey } from "@mui/material/colors";
 import formatDateTime from "@/utils/formatDateTime";
 import type { AirSigmetProperties, ISigmetProperties } from "@/schemas";
+import type { LayerType } from "../Layers/components/Layer/Layer";
 
-type Props = {
+export interface LayerDetails {
+  id: string;
+  type: LayerType;
+  details: ISigmetProperties | AirSigmetProperties;
+}
+
+interface Props extends Pick<LayerDetails, "type" | "details"> {
   onClose: () => void;
-} & (
-  | {
-      type: "isigmet";
-      details: ISigmetProperties;
-    }
-  | {
-      type: "airsigmet";
-      details: AirSigmetProperties;
-    }
-);
+}
 
 const Details = ({ type, details, onClose }: Props) => {
   const { rawSigmet, hazard, validTimeFrom, validTimeTo } = details;

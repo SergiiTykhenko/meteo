@@ -29,6 +29,7 @@
     "maplibre-react-components": "^0.2.6",
     "react": "^19.2.0",
     "react-dom": "^19.2.0",
+    "sha1": "^1.1.1",
     "sirv": "^3.0.2",
     "tailwind-merge": "^3.4.0",
     "zod": "^4.1.13"
@@ -42,6 +43,7 @@
     "@types/node": "^24.10.1",
     "@types/react": "^19.2.5",
     "@types/react-dom": "^19.2.3",
+    "@types/sha1": "^1.1.5",
     "@types/supertest": "^6.0.3",
     "@vitejs/plugin-react": "^5.1.1",
     "cross-env": "^10.1.0",

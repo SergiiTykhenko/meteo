@@ -1,18 +1,26 @@
 import { useCallback, useState } from "react";
 import { RLayer, RSource } from "maplibre-react-components";
-import type { Feature } from "maplibre-gl";
-import { getLayerPaint, getLinePaint } from "./utils";
 import type { ISigmetFeature, AirSigmetFeature } from "@/schemas";
+import { getLayerPaint, getLinePaint } from "./utils";
+
+export type LayerType = "isigmet" | "airsigmet";
 
 interface Props {
   layer: ISigmetFeature | AirSigmetFeature;
-  id: number;
-  type: "isigmet" | "airsigmet";
+  type: LayerType;
   isVisible: boolean;
-  handleClick: (layer: Feature["properties"]) => void;
+  isSelected: boolean;
+  handleClick: (layer: ISigmetFeature | AirSigmetFeature) => void;
 }
 
-export const Layer = ({ layer, id, type, isVisible, handleClick }: Props) => {
+export const Layer = ({
+  layer,
+  type,
+  isVisible,
+  isSelected,
+  handleClick,
+}: Props) => {
+  const { id } = layer;
   const [isHovered, setIsHovered] = useState(false);
 
   const handleMouseEnter = useCallback(() => {
@@ -24,8 +32,8 @@ export const Layer = ({ layer, id, type, isVisible, handleClick }: Props) => {
   }, []);
 
   const handleLayerClick = useCallback(
-    () => handleClick(layer.properties),
-    [handleClick, layer.properties]
+    () => handleClick(layer),
+    [handleClick, layer]
   );
 
   return (
@@ -35,7 +43,7 @@ export const Layer = ({ layer, id, type, isVisible, handleClick }: Props) => {
         id={`${type}-layer-${id}`}
         source={`${type}-source-${id}`}
         type="fill"
-        paint={getLayerPaint(type, isHovered, isVisible)}
+        paint={getLayerPaint(type, isHovered, isSelected, isVisible)}
         onMouseEnter={handleMouseEnter}
         onMouseLeave={handleMouseLeave}
         onClick={isVisible ? handleLayerClick : undefined}

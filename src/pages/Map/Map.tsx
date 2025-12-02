@@ -1,62 +1,62 @@
 import { useCallback, useState, useEffect } from "react";
 import { RMap } from "maplibre-react-components";
 import { Box, CircularProgress, Backdrop } from "@mui/material";
-import Details from "./components/Details/Details";
+import type { AirSigmetFeature, ISigmetFeature } from "@/schemas";
+import Details, { type LayerDetails } from "./components/Details/Details";
 import Filters, { type VisibleLayers } from "./components/Filters/Filters";
-import "maplibre-gl/dist/maplibre-gl.css";
 import useMeteoData from "./hooks/useMeteoData";
-import type { AirSigmetProperties, ISigmetProperties } from "@/schemas";
 import Layers from "./components/Layers/Layers";
+import "maplibre-gl/dist/maplibre-gl.css";
 
 const initialCenter: [number, number] = [0, 0];
 
-export interface SelectedLayer {
-  type: "isigmet" | "airsigmet";
-  details: ISigmetProperties | AirSigmetProperties;
-}
-
 const Map = () => {
   const { meteoData, isLoading, handleFiltersChange } = useMeteoData();
-  const [selectedLayer, setSelectedLayer] = useState<SelectedLayer | null>(
-    null
+  const [selectedLayer, setSelectedLayer] = useState<LayerDetails | null>(null);
+
+  const [visibleLayers, setVisibleLayers] = useState<VisibleLayers>({
+    isigmet: true,
+    airsigmet: true,
+  });
+
+  const handleSetVisibleLayers = useCallback(
+    (nextVisibleLayers: VisibleLayers) => {
+      if (selectedLayer && !nextVisibleLayers[selectedLayer.type]) {
+        setSelectedLayer(null);
+      }
+      setVisibleLayers(nextVisibleLayers);
+    },
+    [selectedLayer]
   );
 
   useEffect(() => {
     if (selectedLayer) {
-      const { rawSigmet } = selectedLayer.details;
+      const isSelectedLayerInMeteoData =
+        meteoData.isigmet.some(({ id }) => id === selectedLayer.id) ||
+        meteoData.airsigmet.some(({ id }) => id === selectedLayer.id);
 
-      if (
-        !meteoData.isigmet.some(
-          ({ properties }) => properties.rawSigmet === rawSigmet
-        ) &&
-        !meteoData.airsigmet.some(
-          ({ properties }) => properties.rawSigmet === rawSigmet
-        )
-      ) {
+      if (!isSelectedLayerInMeteoData) {
         setSelectedLayer(null);
       }
     }
   }, [meteoData]);
 
-  const [visibleLayers, setVisibleLayers] = useState<VisibleLayers>({
-    sigmet: true,
-    airsigmet: true,
-  });
-
   const handleIsigmetLayerClick = useCallback(
-    (layer: ISigmetProperties) =>
+    (layer: ISigmetFeature) =>
       setSelectedLayer({
+        id: layer.id,
         type: "isigmet",
-        details: layer,
+        details: layer.properties,
       }),
     []
   );
 
   const handleAirsigmetLayerClick = useCallback(
-    (layer: AirSigmetProperties) =>
+    (layer: AirSigmetFeature) =>
       setSelectedLayer({
+        id: layer.id,
         type: "airsigmet",
-        details: layer,
+        details: layer.properties,
       }),
     []
   );
@@ -73,13 +73,14 @@ const Map = () => {
         <Layers
           meteoData={meteoData}
           visibleLayers={visibleLayers}
+          selectedLayerId={selectedLayer?.id}
           handleIsigmetLayerClick={handleIsigmetLayerClick}
           handleAirsigmetLayerClick={handleAirsigmetLayerClick}
         />
       </RMap>
       <Filters
         visibleLayers={visibleLayers}
-        setVisibleLayers={setVisibleLayers}
+        setVisibleLayers={handleSetVisibleLayers}
         onFiltersChange={handleFiltersChange}
       />
       {selectedLayer && (

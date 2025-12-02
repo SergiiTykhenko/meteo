@@ -4,7 +4,7 @@ import TimeFilter from "./components/TimeFilter/TimeFilter";
 import LevelFilter from "./components/LevelFilter/LevelFilter";
 
 export interface VisibleLayers {
-  sigmet: boolean;
+  isigmet: boolean;
   airsigmet: boolean;
 }
 
@@ -62,12 +62,12 @@ const Filters = ({
         <Box display="flex" flexDirection="row" gap={1} mb={1}>
           <Button
             variant="contained"
-            color={visibleLayers.sigmet ? "error" : "inherit"}
+            color={visibleLayers.isigmet ? "error" : "inherit"}
             sx={{ borderRadius: "30px" }}
             onClick={() =>
               setVisibleLayers({
                 ...visibleLayers,
-                sigmet: !visibleLayers.sigmet,
+                isigmet: !visibleLayers.isigmet,
               })
             }
           >
