@@ -1,9 +1,6 @@
 import { Fragment } from "react/jsx-runtime";
+import type { AirSigmetProperties, ISigmetProperties } from "@/schemas";
 import { Layer } from "./components/Layer/Layer";
-import type {
-  AirSigmetProperties,
-  ISigmetProperties,
-} from "../../../../../../schemas";
 import type { VisibleLayers } from "../Filters/Filters";
 import type { MeteoData } from "../../hooks/useMeteoData";
 

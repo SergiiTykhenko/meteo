@@ -5,14 +5,14 @@ import {
   schemaByType,
   type ISigmetFeature,
   type AirSigmetFeature,
-} from "./schemas.ts";
+} from "./schemas.js";
 
 interface Cache {
   initialisedAt: number | null;
-  dataByUrl: Record<string, ISigmetFeature | AirSigmetFeature>;
+  dataByUrl: Record<string, ISigmetFeature[] | AirSigmetFeature[]>;
 }
 
-const cache: Cache = {
+export const cache: Cache = {
   initialisedAt: null,
   dataByUrl: {},
 };
@@ -78,7 +78,7 @@ const fetchWeatherData = async (type: DataType, filters: Filters) => {
     throw new Error(`Invalid ${type} data: ${parsedData.error.message}`);
   }
 
-  const features = json.features;
+  const { features } = parsedData.data;
 
   if (!cache.initialisedAt) {
     cache.initialisedAt = Date.now();
@@ -94,7 +94,7 @@ const getLevelsToFetch = (levelFrom: string, levelTo: string) => {
   const levelRange = Number(levelTo) - Number(levelFrom);
   const numberOfLevelsToFetch = Math.ceil(levelRange / 6000);
 
-  return _.times(numberOfLevelsToFetch).reduce((acc, _, i) => {
+  return _.times(numberOfLevelsToFetch).reduce<number[]>((acc, _, i) => {
     if (i === 0) {
       return [Number(levelFrom) + levelStep / 2];
     }
@@ -110,12 +110,17 @@ const getLevelsToFetch = (levelFrom: string, levelTo: string) => {
 const getMeteoData = async (req: Request, type: "isigmet" | "airsigmet") => {
   const { levelFrom, levelTo, hoursChange } = req.query;
 
-  const filters: Filters = hoursChange ? { hoursChange } : {};
+  const filters: Filters = hoursChange
+    ? { hoursChange: hoursChange.toString() }
+    : {};
 
   let responseData;
 
   if (levelFrom && levelTo) {
-    const levelsToFetch = getLevelsToFetch(levelFrom, levelTo);
+    const levelsToFetch = getLevelsToFetch(
+      levelFrom.toString(),
+      levelTo.toString()
+    );
 
     if (!levelsToFetch.length) {
       throw new Error("Invalid level range");
@@ -143,7 +148,9 @@ router.get("/isigmet", async (req, res) => {
 
     res.json({ data });
   } catch (error) {
-    res.status(500).json({ error: error.message });
+    res.status(500).json({
+      error: error instanceof Error ? error.message : "Unknown error",
+    });
   }
 });
 
@@ -153,7 +160,9 @@ router.get("/airsigmet", async (req, res) => {
 
     res.json({ data });
   } catch (error) {
-    res.status(500).json({ error: error.message });
+    res.status(500).json({
+      error: error instanceof Error ? error.message : "Unknown error",
+    });
   }
 });
 

@@ -3,7 +3,6 @@ import { Box, Slider, Typography } from "@mui/material";
 import { format } from "date-fns";
 
 interface Props {
-  dateFilter: number;
   onDateFilterChange: (dateFilter: number) => void;
 }
 

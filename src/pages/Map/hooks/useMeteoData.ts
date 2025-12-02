@@ -11,7 +11,8 @@ import {
   AirSigmetFeaturesSchema,
   type ISigmetFeatures,
   type AirSigmetFeatures,
-} from "../../../../../schemas";
+} from "@/schemas";
+import useSnackbars from "@/hooks/useSnackbars/useSnackbars";
 
 export interface MeteoData {
   isigmet: ISigmetFeatures;
@@ -47,6 +48,8 @@ const fetchAirsigmetData = async (filtersQuery?: string) => {
 };
 
 const useMeteoData = () => {
+  const addSnackbar = useSnackbars();
+
   const fetchData = useCallback(
     async (_prevState: MeteoData, filtersQuery?: string) => {
       try {
@@ -59,14 +62,19 @@ const useMeteoData = () => {
           isigmet: isigmetData,
           airsigmet: airsigmetData,
         };
-      } catch {
+      } catch (error) {
+        addSnackbar({
+          message: error instanceof Error ? error.message : "Unknown error",
+          type: "error",
+        });
+
         return {
           isigmet: [],
           airsigmet: [],
         };
       }
     },
-    []
+    [addSnackbar]
   );
 
   const [meteoData, handleFetchData, isLoading] = useActionState<
@@ -74,10 +82,7 @@ const useMeteoData = () => {
     string
   >(fetchData, { isigmet: [], airsigmet: [] });
 
-  useEffect(
-    () => startTransition(() => handleFetchData("")),
-    [handleFetchData]
-  );
+  useEffect(() => startTransition(() => handleFetchData("")), []);
 
   const handleFiltersChange = useCallback(
     (filters: Partial<FiltersType>) => {

@@ -1,20 +1,18 @@
 import express from "express";
 import fs from "node:fs/promises";
-import routes from "./routes.ts";
+import routes from "./routes/routes.js";
 
-// Constants
 const isProduction = process.env.NODE_ENV === "production";
 const port = process.env.PORT || 5173;
 const base = process.env.BASE || "/";
 
-// Cached production assets
 const templateHtml = isProduction
   ? await fs.readFile("./dist/client/index.html", "utf-8")
   : "";
 
 const app = express();
 
-let vite;
+let vite: import("vite").ViteDevServer | undefined;
 if (!isProduction) {
   const { createServer } = await import("vite");
   vite = await createServer({
@@ -32,7 +30,19 @@ if (!isProduction) {
 
 app.use("/api", routes);
 
-app.use("*all", async (req, res) => {
+app.use("*all", async (req, res, next) => {
+  if (!req.headers.accept?.includes("text/html")) {
+    return next();
+  }
+
+  if (res.headersSent) {
+    return next();
+  }
+
+  const path = req.path;
+  if (path.includes(".") && !path.endsWith("/") && path !== "/") {
+    return next();
+  }
   try {
     const url = req.originalUrl.replace(base, "");
 
@@ -40,14 +50,15 @@ app.use("*all", async (req, res) => {
     let render: (url: string) => { head: string; html: string };
 
     if (!isProduction) {
-      // Always read fresh template in development
       template = await fs.readFile("./index.html", "utf-8");
-      template = await vite.transformIndexHtml(url, template);
-      render = (await vite.ssrLoadModule("/src/entry-server.tsx")).render;
+      template = (await vite?.transformIndexHtml(url, template)) ?? "";
+      render =
+        (await vite?.ssrLoadModule("/src/entry-server.tsx"))?.render ??
+        (() => ({ head: "", html: "" }));
     } else {
       template = templateHtml;
       // @ts-expect-error Expected error
-      render = (await import("./dist/server/entry-server.js")).render;
+      render = (await import("../entry-server/entry-server.js")).render;
     }
 
     const rendered = await render(url);
@@ -58,13 +69,12 @@ app.use("*all", async (req, res) => {
 
     res.status(200).set({ "Content-Type": "text/html" }).send(html);
   } catch (e) {
-    vite?.ssrFixStacktrace(e);
-    console.log(e.stack);
-    res.status(500).end(e.stack);
+    vite?.ssrFixStacktrace(e as Error);
+    console.log((e as Error).stack);
+    res.status(500).end((e as Error).stack);
   }
 });
 
-// Start http server
 app.listen(port, () => {
   console.log(`Server started at http://localhost:${port}`);
 });

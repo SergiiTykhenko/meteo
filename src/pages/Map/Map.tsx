@@ -5,10 +5,7 @@ import Details from "./components/Details/Details";
 import Filters, { type VisibleLayers } from "./components/Filters/Filters";
 import "maplibre-gl/dist/maplibre-gl.css";
 import useMeteoData from "./hooks/useMeteoData";
-import type {
-  AirSigmetProperties,
-  ISigmetProperties,
-} from "../../../../schemas";
+import type { AirSigmetProperties, ISigmetProperties } from "@/schemas";
 import Layers from "./components/Layers/Layers";
 
 const initialCenter: [number, number] = [0, 0];

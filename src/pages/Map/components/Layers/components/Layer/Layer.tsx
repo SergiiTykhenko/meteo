@@ -2,10 +2,7 @@ import { useCallback, useState } from "react";
 import { RLayer, RSource } from "maplibre-react-components";
 import type { Feature } from "maplibre-gl";
 import { getLayerPaint, getLinePaint } from "./utils";
-import type {
-  ISigmetFeature,
-  AirSigmetFeature,
-} from "../../../../../../../../schemas";
+import type { ISigmetFeature, AirSigmetFeature } from "@/schemas";
 
 interface Props {
   layer: ISigmetFeature | AirSigmetFeature;

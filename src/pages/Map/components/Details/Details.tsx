@@ -1,10 +1,7 @@
 import { Box, Typography, IconButton } from "@mui/material";
 import { red, blue, grey } from "@mui/material/colors";
-import formatDateTime from "../../../../../../utils/formatDateTime";
-import type {
-  AirSigmetProperties,
-  ISigmetProperties,
-} from "../../../../../../schemas";
+import formatDateTime from "@/utils/formatDateTime";
+import type { AirSigmetProperties, ISigmetProperties } from "@/schemas";
 
 type Props = {
   onClose: () => void;

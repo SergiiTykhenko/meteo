@@ -1,14 +1,12 @@
 import CssBaseline from "@mui/material/CssBaseline";
-import { Suspense } from "react";
-import Home from "./pages/Home/Home";
+import Map from "./pages/Map/Map";
+import SnackbarsProvider from "./components/SnackbarsProvider/SnackbarsProvider";
 
 const App = () => (
-  <>
+  <SnackbarsProvider>
     <CssBaseline />
-    <Suspense fallback={<div>Loading...</div>}>
-      <Home />
-    </Suspense>
-  </>
+    <Map />
+  </SnackbarsProvider>
 );
 
 export default App;

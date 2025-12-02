@@ -2,7 +2,6 @@ import { useRef, useState, useEffect } from "react";
 import { Box, Slider, Typography } from "@mui/material";
 
 interface Props {
-  levelFilter: [number, number];
   onLevelFilterChange: (levelFilter: [number, number]) => void;
 }
 
