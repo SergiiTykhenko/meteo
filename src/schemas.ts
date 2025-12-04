@@ -17,10 +17,23 @@ const ISigmetPropertiesSchema = z.object({
   rawSigmet: z.string().nullish(),
 });
 
-const GeometrySchema = z.object({
-  type: z.literal("Polygon"),
-  coordinates: z.array(z.array(z.tuple([z.number(), z.number()]))),
-});
+const GeometrySchema = z
+  .object({
+    type: z.literal("Polygon"),
+    coordinates: z.array(z.array(z.tuple([z.number(), z.number()]))),
+  })
+  .or(
+    z.object({
+      type: z.literal("Point"),
+      coordinates: z.tuple([z.number(), z.number()]),
+    })
+  )
+  .or(
+    z.object({
+      type: z.literal("LineString"),
+      coordinates: z.array(z.tuple([z.number(), z.number()])),
+    })
+  );
 
 export const ISigmetFeatureSchema = z.object({
   id: z.string(),

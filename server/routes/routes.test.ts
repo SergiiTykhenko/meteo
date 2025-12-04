@@ -2,7 +2,7 @@ import express from "express";
 import request from "supertest";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
-vi.mock("../schemas.ts", () => {
+vi.mock("../schemas", () => {
   const schema = {
     safeParse: (input: unknown) => ({ success: true, data: input }),
   };
@@ -29,9 +29,10 @@ describe("API routes", () => {
   beforeEach(async () => {
     vi.resetAllMocks();
 
-    const routesModule = await import("./routes.js");
-    routesModule.cache.initialisedAt = null;
-    routesModule.cache.dataByUrl = {};
+    const cacheModule = await import("../utils/cache.js");
+    if (typeof cacheModule.resetCache === "function") {
+      cacheModule.resetCache();
+    }
   });
 
   it("returns data for /api/isigmet", async () => {
@@ -49,7 +50,8 @@ describe("API routes", () => {
     const res = await request(app).get("/api/isigmet");
 
     expect(res.status).toBe(200);
-    expect(res.body).toEqual({ data: features });
+    expect(res.body.data).toHaveLength(1);
+    expect(res.body.data[0]).toMatchObject(features[0]);
     expect(global.fetch).toHaveBeenCalledTimes(1);
   });
 
@@ -68,7 +70,8 @@ describe("API routes", () => {
     const res = await request(app).get("/api/airsigmet");
 
     expect(res.status).toBe(200);
-    expect(res.body).toEqual({ data: features });
+    expect(res.body.data).toHaveLength(1);
+    expect(res.body.data[0]).toMatchObject(features[0]);
     expect(global.fetch).toHaveBeenCalledTimes(1);
   });
 

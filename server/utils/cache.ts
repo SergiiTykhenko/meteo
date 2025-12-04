@@ -1,4 +1,4 @@
-import type { ISigmetFeature, AirSigmetFeature } from "../schemas.js";
+import type { ISigmetFeature, AirSigmetFeature } from "../schemas";
 
 interface Cache {
   initialisedAt: number | null;
@@ -49,4 +49,10 @@ export const cacheData = (
   }
 
   cache.dataByUrl[cacheKey] = data;
+};
+
+// For tests only
+export const resetCache = () => {
+  cache.initialisedAt = null;
+  cache.dataByUrl = {};
 };

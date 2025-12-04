@@ -38,10 +38,10 @@ export const Layer = ({
 
   return (
     <>
-      <RSource id={`${type}-source-${id}`} type="geojson" data={layer} />
+      <RSource id={`source-${id}`} type="geojson" data={layer} />
       <RLayer
-        id={`${type}-layer-${id}`}
-        source={`${type}-source-${id}`}
+        id={`layer-${id}`}
+        source={`source-${id}`}
         type="fill"
         paint={getLayerPaint(type, isHovered, isSelected, isVisible)}
         onMouseEnter={handleMouseEnter}
@@ -49,8 +49,8 @@ export const Layer = ({
         onClick={isVisible ? handleLayerClick : undefined}
       />
       <RLayer
-        id={`${type}-layer-line-${id}`}
-        source={`${type}-source-${id}`}
+        id={`layer-line-${id}`}
+        source={`source-${id}`}
         type="line"
         paint={getLinePaint(type, isVisible)}
       />
