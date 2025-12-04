@@ -12,8 +12,7 @@
     "build:client": "vite build --outDir dist/client",
     "build:entry-server": "vite build --ssr src/entry-server.tsx --outDir dist/entry-server",
     "build:server": "tsc -p tsconfig.node.json",
-    "start:server": "cross-env NODE_ENV=production node dist/server/index.js",
-    "start": "node dist/server/index.js",
+    "start": "cross-env NODE_ENV=production node dist/server/index.js",
     "test": "vitest run",
     "prepare": "husky"
   },
