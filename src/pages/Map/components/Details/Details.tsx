@@ -14,9 +14,26 @@ interface Props extends Pick<LayerDetails, "type" | "details"> {
   onClose: () => void;
 }
 
+const getAltitude = (details: ISigmetProperties | AirSigmetProperties) => {
+  if ("altitudeHi1" in details) {
+    return details.altitudeHi1;
+  }
+
+  if ("top" in details) {
+    return details.top;
+  }
+
+  if ("base" in details) {
+    return details.base;
+  }
+
+  return null;
+};
+
 const Details = ({ type, details, onClose }: Props) => {
   const { rawSigmet, hazard, validTimeFrom, validTimeTo } = details;
   const color = type === "isigmet" ? red[500] : blue[500];
+  const altitude = getAltitude(details);
 
   return (
     <Box
@@ -72,9 +89,9 @@ const Details = ({ type, details, onClose }: Props) => {
         <Typography>
           <b>Hazard:</b> {hazard}
         </Typography>
-        {"altitudeHi1" in details && (
+        {altitude && (
           <Typography>
-            <b>Altitude:</b> {details.altitudeHi1}
+            <b>Altitude:</b> {altitude} ft
           </Typography>
         )}
         {validTimeFrom && (

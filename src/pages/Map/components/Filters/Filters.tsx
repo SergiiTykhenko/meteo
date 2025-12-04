@@ -58,7 +58,7 @@ const Filters = ({
       }}
     >
       <Typography sx={{ px: 2, mb: 1, fontWeight: "bold" }}>Layers</Typography>
-      <Box sx={{ overflowY: "auto", px: 2 }}>
+      <Box sx={{ overflowY: "auto", overflowX: "hidden", px: 2 }}>
         <Box display="flex" flexDirection="row" gap={1} mb={1}>
           <Button
             variant="contained"

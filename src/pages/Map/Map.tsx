@@ -6,9 +6,8 @@ import Details, { type LayerDetails } from "./components/Details/Details";
 import Filters, { type VisibleLayers } from "./components/Filters/Filters";
 import useMeteoData from "./hooks/useMeteoData";
 import Layers from "./components/Layers/Layers";
+import { mapStyleUrl, initialCenter } from "./consts";
 import "maplibre-gl/dist/maplibre-gl.css";
-
-const initialCenter: [number, number] = [0, 0];
 
 const Map = () => {
   const { meteoData, isLoading, handleFiltersChange } = useMeteoData();
@@ -68,7 +67,7 @@ const Map = () => {
         initialCenter={initialCenter}
         initialZoom={2}
         style={{ height: "100vh", width: "100vw" }}
-        mapStyle="https://api.maptiler.com/maps/streets-v4/style.json?key=fGPVSnKP4eX6fvaBY8La"
+        mapStyle={mapStyleUrl}
       >
         <Layers
           meteoData={meteoData}

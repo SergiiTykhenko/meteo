@@ -1,9 +1,9 @@
 import { Router, type Request } from "express";
 import _ from "lodash";
 import { addHours } from "date-fns";
-import { generateHashId } from "./utils";
-import { schemaByType } from "../schemas";
-import { cacheData, getCachedData } from "../utils/cache";
+import { generateHashId } from "./utils.js";
+import { schemaByType } from "../schemas.js";
+import { cacheData, getCachedData } from "../utils/cache/cache.js";
 
 const router = Router();
 

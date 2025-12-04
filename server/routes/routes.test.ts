@@ -29,7 +29,7 @@ describe("API routes", () => {
   beforeEach(async () => {
     vi.resetAllMocks();
 
-    const cacheModule = await import("../utils/cache.js");
+    const cacheModule = await import("../utils/cache/cache.js");
     if (typeof cacheModule.resetCache === "function") {
       cacheModule.resetCache();
     }

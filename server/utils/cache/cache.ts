@@ -1,4 +1,4 @@
-import type { ISigmetFeature, AirSigmetFeature } from "../schemas";
+import type { ISigmetFeature, AirSigmetFeature } from "../../schemas.js";
 
 interface Cache {
   initialisedAt: number | null;
@@ -22,6 +22,7 @@ const getIsCacheExpired = () => {
 };
 
 export const getCachedData = (cacheKey: string) => {
+  console.log(cache);
   if (!cache.initialisedAt) {
     return null;
   }
