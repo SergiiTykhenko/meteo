@@ -7,16 +7,16 @@ import {
 } from "react";
 import type { FiltersType } from "../components/Filters/Filters";
 import {
-  ISigmetFeaturesSchema,
-  AirSigmetFeaturesSchema,
-  type ISigmetFeatures,
-  type AirSigmetFeatures,
+  ISigmetFeatureCollectionSchema,
+  AirSigmetFeatureCollectionSchema,
+  type ISigmetFeatureCollection,
+  type AirSigmetFeatureCollection,
 } from "@/schemas";
 import useSnackbars from "@/hooks/useSnackbars/useSnackbars";
 
 export interface MeteoData {
-  isigmet: ISigmetFeatures;
-  airsigmet: AirSigmetFeatures;
+  isigmet: ISigmetFeatureCollection;
+  airsigmet: AirSigmetFeatureCollection;
 }
 
 const fetchIsigmetData = async (filtersQuery?: string) => {
@@ -24,7 +24,7 @@ const fetchIsigmetData = async (filtersQuery?: string) => {
     `/api/isigmet${filtersQuery ? filtersQuery : ""}`
   );
   const { data } = await response.json();
-  const result = ISigmetFeaturesSchema.safeParse(data);
+  const result = ISigmetFeatureCollectionSchema.safeParse(data);
 
   if (!result.success) {
     throw new Error("Invalid ISigmet data");
@@ -38,7 +38,7 @@ const fetchAirsigmetData = async (filtersQuery?: string) => {
     `/api/airsigmet${filtersQuery ? filtersQuery : ""}`
   );
   const { data } = await response.json();
-  const result = AirSigmetFeaturesSchema.safeParse(data);
+  const result = AirSigmetFeatureCollectionSchema.safeParse(data);
 
   if (!result.success) {
     throw new Error("Invalid AirSigmet data");
@@ -51,7 +51,7 @@ const useMeteoData = () => {
   const addSnackbar = useSnackbars();
 
   const fetchData = useCallback(
-    async (_prevState: MeteoData, filtersQuery?: string) => {
+    async (_prevState: MeteoData | null, filtersQuery?: string) => {
       try {
         const [isigmetData, airsigmetData] = await Promise.all([
           fetchIsigmetData(filtersQuery),
@@ -68,19 +68,16 @@ const useMeteoData = () => {
           type: "error",
         });
 
-        return {
-          isigmet: [],
-          airsigmet: [],
-        };
+        return null;
       }
     },
     [addSnackbar]
   );
 
   const [meteoData, handleFetchData, isLoading] = useActionState<
-    MeteoData,
+    MeteoData | null,
     string
-  >(fetchData, { isigmet: [], airsigmet: [] });
+  >(fetchData, null);
 
   useEffect(() => startTransition(() => handleFetchData("")), []);
 

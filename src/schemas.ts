@@ -42,10 +42,15 @@ export const ISigmetFeatureSchema = z.object({
   geometry: GeometrySchema,
 });
 
-export const ISigmetFeaturesSchema = z.array(ISigmetFeatureSchema);
+export const ISigmetFeatureCollectionSchema = z.object({
+  type: z.literal("FeatureCollection"),
+  features: z.array(ISigmetFeatureSchema),
+});
 
 export type ISigmetFeature = z.infer<typeof ISigmetFeatureSchema>;
-export type ISigmetFeatures = z.infer<typeof ISigmetFeaturesSchema>;
+export type ISigmetFeatureCollection = z.infer<
+  typeof ISigmetFeatureCollectionSchema
+>;
 export type ISigmetProperties = z.infer<typeof ISigmetPropertiesSchema>;
 
 const AirSigmetPropertiesSchema = z.object({
@@ -72,8 +77,19 @@ export const AirSigmetFeatureSchema = z.object({
   geometry: GeometrySchema,
 });
 
-export const AirSigmetFeaturesSchema = z.array(AirSigmetFeatureSchema);
+export const AirSigmetFeatureCollectionSchema = z.object({
+  type: z.literal("FeatureCollection"),
+  features: z.array(AirSigmetFeatureSchema),
+});
 
 export type AirSigmetFeature = z.infer<typeof AirSigmetFeatureSchema>;
-export type AirSigmetFeatures = z.infer<typeof AirSigmetFeaturesSchema>;
+export type AirSigmetFeatureCollection = z.infer<
+  typeof AirSigmetFeatureCollectionSchema
+>;
 export type AirSigmetProperties = z.infer<typeof AirSigmetPropertiesSchema>;
+
+export type Properties = ISigmetProperties | AirSigmetProperties;
+export type Feature = ISigmetFeature | AirSigmetFeature;
+export type FeatureCollection =
+  | AirSigmetFeatureCollection
+  | ISigmetFeatureCollection;

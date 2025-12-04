@@ -1,13 +1,20 @@
 import { useCallback, useState, useEffect } from "react";
 import { RMap } from "maplibre-react-components";
 import { Box, CircularProgress, Backdrop } from "@mui/material";
-import type { AirSigmetFeature, ISigmetFeature } from "@/schemas";
-import Details, { type LayerDetails } from "./components/Details/Details";
+import type { AirSigmetFeature, Properties, ISigmetFeature } from "@/schemas";
+import Details from "./components/Details/Details";
 import Filters, { type VisibleLayers } from "./components/Filters/Filters";
 import useMeteoData from "./hooks/useMeteoData";
 import Layers from "./components/Layers/Layers";
 import { mapStyleUrl, initialCenter } from "./consts";
 import "maplibre-gl/dist/maplibre-gl.css";
+import type { LayerType } from "./components/Layers/components/Layer/Layer";
+
+interface LayerDetails {
+  id: string;
+  type: LayerType;
+  properties: Properties;
+}
 
 const Map = () => {
   const { meteoData, isLoading, handleFiltersChange } = useMeteoData();
@@ -31,8 +38,8 @@ const Map = () => {
   useEffect(() => {
     if (selectedLayer) {
       const isSelectedLayerInMeteoData =
-        meteoData.isigmet.some(({ id }) => id === selectedLayer.id) ||
-        meteoData.airsigmet.some(({ id }) => id === selectedLayer.id);
+        meteoData?.isigmet.features.some(({ id }) => id === selectedLayer.id) ||
+        meteoData?.airsigmet.features.some(({ id }) => id === selectedLayer.id);
 
       if (!isSelectedLayerInMeteoData) {
         setSelectedLayer(null);
@@ -41,21 +48,21 @@ const Map = () => {
   }, [meteoData]);
 
   const handleIsigmetLayerClick = useCallback(
-    (layer: ISigmetFeature) =>
+    (feature: ISigmetFeature) =>
       setSelectedLayer({
-        id: layer.id,
+        id: feature.id,
         type: "isigmet",
-        details: layer.properties,
+        properties: feature.properties,
       }),
     []
   );
 
   const handleAirsigmetLayerClick = useCallback(
-    (layer: AirSigmetFeature) =>
+    (feature: AirSigmetFeature) =>
       setSelectedLayer({
-        id: layer.id,
+        id: feature.id,
         type: "airsigmet",
-        details: layer.properties,
+        properties: feature.properties,
       }),
     []
   );
@@ -69,13 +76,14 @@ const Map = () => {
         style={{ height: "100vh", width: "100vw" }}
         mapStyle={mapStyleUrl}
       >
-        <Layers
-          meteoData={meteoData}
-          visibleLayers={visibleLayers}
-          selectedLayerId={selectedLayer?.id}
-          handleIsigmetLayerClick={handleIsigmetLayerClick}
-          handleAirsigmetLayerClick={handleAirsigmetLayerClick}
-        />
+        {meteoData && (
+          <Layers
+            meteoData={meteoData}
+            visibleLayers={visibleLayers}
+            handleIsigmetLayerClick={handleIsigmetLayerClick}
+            handleAirsigmetLayerClick={handleAirsigmetLayerClick}
+          />
+        )}
       </RMap>
       <Filters
         visibleLayers={visibleLayers}
@@ -85,7 +93,7 @@ const Map = () => {
       {selectedLayer && (
         <Details
           type={selectedLayer.type}
-          details={selectedLayer.details}
+          properties={selectedLayer.properties}
           onClose={() => setSelectedLayer(null)}
         />
       )}

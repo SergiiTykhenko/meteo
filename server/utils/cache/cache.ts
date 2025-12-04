@@ -22,7 +22,6 @@ const getIsCacheExpired = () => {
 };
 
 export const getCachedData = (cacheKey: string) => {
-  console.log(cache);
   if (!cache.initialisedAt) {
     return null;
   }

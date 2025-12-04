@@ -36,13 +36,16 @@ describe("API routes", () => {
   });
 
   it("returns data for /api/isigmet", async () => {
-    const features = [{ properties: { rawSigmet: "SIGMET-1" } }];
+    const featuresCollection = {
+      type: "FeatureCollection",
+      features: [{ properties: { rawSigmet: "SIGMET-1" } }],
+    };
 
     (globalThis as unknown as { fetch: unknown }).fetch = vi
       .fn()
       .mockResolvedValue({
         ok: true,
-        json: vi.fn().mockResolvedValue({ features }),
+        json: vi.fn().mockResolvedValue(featuresCollection),
       });
 
     const app = await createApp();
@@ -50,19 +53,24 @@ describe("API routes", () => {
     const res = await request(app).get("/api/isigmet");
 
     expect(res.status).toBe(200);
-    expect(res.body.data).toHaveLength(1);
-    expect(res.body.data[0]).toMatchObject(features[0]);
+    expect(res.body.data.type).toBe("FeatureCollection");
+    expect(res.body.data.features[0]).toMatchObject(
+      featuresCollection.features[0]
+    );
     expect(global.fetch).toHaveBeenCalledTimes(1);
   });
 
   it("returns data for /api/airsigmet", async () => {
-    const features = [{ properties: { rawSigmet: "AIRSIGMET-1" } }];
+    const featuresCollection = {
+      type: "FeatureCollection",
+      features: [{ properties: { rawSigmet: "AIRSIGMET-1" } }],
+    };
 
     (globalThis as unknown as { fetch: unknown }).fetch = vi
       .fn()
       .mockResolvedValue({
         ok: true,
-        json: vi.fn().mockResolvedValue({ features }),
+        json: vi.fn().mockResolvedValue(featuresCollection),
       });
 
     const app = await createApp();
@@ -70,8 +78,10 @@ describe("API routes", () => {
     const res = await request(app).get("/api/airsigmet");
 
     expect(res.status).toBe(200);
-    expect(res.body.data).toHaveLength(1);
-    expect(res.body.data[0]).toMatchObject(features[0]);
+    expect(res.body.data.type).toBe("FeatureCollection");
+    expect(res.body.data.features[0]).toMatchObject(
+      featuresCollection.features[0]
+    );
     expect(global.fetch).toHaveBeenCalledTimes(1);
   });
 

@@ -1,59 +1,36 @@
-import { useCallback, useState } from "react";
 import { RLayer, RSource } from "maplibre-react-components";
-import type { ISigmetFeature, AirSigmetFeature } from "@/schemas";
-import { getLayerPaint, getLinePaint } from "./utils";
+import type { FeatureCollection, Feature } from "@/schemas";
+import { layerPaint, linePaint } from "./consts";
 
 export type LayerType = "isigmet" | "airsigmet";
 
 interface Props {
-  layer: ISigmetFeature | AirSigmetFeature;
+  featuresCollection: FeatureCollection;
   type: LayerType;
-  isVisible: boolean;
-  isSelected: boolean;
-  handleClick: (layer: ISigmetFeature | AirSigmetFeature) => void;
+  handleClick: (layer: Feature) => void;
 }
 
-export const Layer = ({
-  layer,
-  type,
-  isVisible,
-  isSelected,
-  handleClick,
-}: Props) => {
-  const { id } = layer;
-  const [isHovered, setIsHovered] = useState(false);
+export const Layer = ({ featuresCollection, type, handleClick }: Props) => (
+  <>
+    <RSource id={`source-${type}`} type="geojson" data={featuresCollection} />
+    <RLayer
+      id={`layer-${type}`}
+      source={`source-${type}`}
+      type="fill"
+      paint={layerPaint[type]}
+      onClick={(e) => {
+        const feature = e.features?.[0];
 
-  const handleMouseEnter = useCallback(() => {
-    setIsHovered(true);
-  }, []);
-
-  const handleMouseLeave = useCallback(() => {
-    setIsHovered(false);
-  }, []);
-
-  const handleLayerClick = useCallback(
-    () => handleClick(layer),
-    [handleClick, layer]
-  );
-
-  return (
-    <>
-      <RSource id={`source-${id}`} type="geojson" data={layer} />
-      <RLayer
-        id={`layer-${id}`}
-        source={`source-${id}`}
-        type="fill"
-        paint={getLayerPaint(type, isHovered, isSelected, isVisible)}
-        onMouseEnter={handleMouseEnter}
-        onMouseLeave={handleMouseLeave}
-        onClick={isVisible ? handleLayerClick : undefined}
-      />
-      <RLayer
-        id={`layer-line-${id}`}
-        source={`source-${id}`}
-        type="line"
-        paint={getLinePaint(type, isVisible)}
-      />
-    </>
-  );
-};
+        if (feature) {
+          handleClick(feature as unknown as Feature);
+        }
+      }}
+    />
+    <RLayer
+      id={`layer-line-${type}`}
+      source={`source-${type}`}
+      type="line"
+      paint={linePaint[type]}
+    />
+  </>
+);

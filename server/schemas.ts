@@ -42,6 +42,7 @@ const ISigmetFeatureSchema = z.object({
 });
 
 export const ISigmetGeoJSONSchema = z.object({
+  type: z.literal("FeatureCollection"),
   features: z.array(ISigmetFeatureSchema),
 });
 

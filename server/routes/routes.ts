@@ -25,7 +25,7 @@ const getUrl = (type: DataType, filters: Filters) => {
   }`;
 };
 
-const fetchWeatherData = async (type: DataType, filters: Filters) => {
+const fetchWeatherFeatures = async (type: DataType, filters: Filters) => {
   const cacheKey = JSON.stringify({ type, ...filters });
 
   const cachedData = getCachedData(cacheKey);
@@ -87,7 +87,7 @@ const getMeteoData = async (req: Request, type: "isigmet" | "airsigmet") => {
     ? { hoursChange: hoursChange.toString() }
     : {};
 
-  let responseData;
+  let features;
 
   if (levelFrom && levelTo) {
     const levelsToFetch = getLevelsToFetch(
@@ -101,18 +101,18 @@ const getMeteoData = async (req: Request, type: "isigmet" | "airsigmet") => {
 
     const data = await Promise.all(
       levelsToFetch.map((level) =>
-        fetchWeatherData(type, { ...filters, level: level.toString() })
+        fetchWeatherFeatures(type, { ...filters, level: level.toString() })
       )
     );
 
     const flattenedData = data.flat();
-    responseData = _.uniqBy(flattenedData, "id");
+    features = _.uniqBy(flattenedData, "id");
   } else {
-    const data = await fetchWeatherData(type, filters);
-    responseData = _.uniqBy(data, "id");
+    const data = await fetchWeatherFeatures(type, filters);
+    features = _.uniqBy(data, "id");
   }
 
-  return responseData;
+  return { type: "FeatureCollection", features };
 };
 
 // routes

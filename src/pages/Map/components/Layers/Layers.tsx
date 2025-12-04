@@ -6,7 +6,6 @@ import type { MeteoData } from "../../hooks/useMeteoData";
 interface Props {
   meteoData: MeteoData;
   visibleLayers: VisibleLayers;
-  selectedLayerId: string | undefined;
   handleIsigmetLayerClick: (layer: ISigmetFeature) => void;
   handleAirsigmetLayerClick: (layer: AirSigmetFeature) => void;
 }
@@ -14,31 +13,24 @@ interface Props {
 const Layers = ({
   meteoData,
   visibleLayers,
-  selectedLayerId,
   handleIsigmetLayerClick,
   handleAirsigmetLayerClick,
 }: Props) => (
   <>
-    {meteoData.isigmet.map((layer) => (
+    {visibleLayers.isigmet && (
       <Layer
-        key={layer.id}
-        layer={layer}
+        featuresCollection={meteoData.isigmet}
         type="isigmet"
-        isVisible={visibleLayers.isigmet}
-        isSelected={selectedLayerId === layer.id}
         handleClick={handleIsigmetLayerClick}
       />
-    ))}
-    {meteoData.airsigmet.map((layer) => (
+    )}
+    {visibleLayers.airsigmet && (
       <Layer
-        key={layer.id}
-        layer={layer}
+        featuresCollection={meteoData.airsigmet}
         type="airsigmet"
-        isVisible={visibleLayers.airsigmet}
-        isSelected={selectedLayerId === layer.id}
         handleClick={handleAirsigmetLayerClick}
       />
-    ))}
+    )}
   </>
 );
 

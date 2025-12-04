@@ -4,36 +4,32 @@ import formatDateTime from "@/utils/formatDateTime";
 import type { AirSigmetProperties, ISigmetProperties } from "@/schemas";
 import type { LayerType } from "../Layers/components/Layer/Layer";
 
-export interface LayerDetails {
-  id: string;
+interface Props {
   type: LayerType;
-  details: ISigmetProperties | AirSigmetProperties;
-}
-
-interface Props extends Pick<LayerDetails, "type" | "details"> {
+  properties: ISigmetProperties | AirSigmetProperties;
   onClose: () => void;
 }
 
-const getAltitude = (details: ISigmetProperties | AirSigmetProperties) => {
-  if ("altitudeHi1" in details) {
-    return details.altitudeHi1;
+const getAltitude = (properties: ISigmetProperties | AirSigmetProperties) => {
+  if ("altitudeHi1" in properties) {
+    return properties.altitudeHi1;
   }
 
-  if ("top" in details) {
-    return details.top;
+  if ("top" in properties) {
+    return properties.top;
   }
 
-  if ("base" in details) {
-    return details.base;
+  if ("base" in properties) {
+    return properties.base;
   }
 
   return null;
 };
 
-const Details = ({ type, details, onClose }: Props) => {
-  const { rawSigmet, hazard, validTimeFrom, validTimeTo } = details;
+const Details = ({ type, properties, onClose }: Props) => {
+  const { rawSigmet, hazard, validTimeFrom, validTimeTo } = properties;
   const color = type === "isigmet" ? red[500] : blue[500];
-  const altitude = getAltitude(details);
+  const altitude = getAltitude(properties);
 
   return (
     <Box

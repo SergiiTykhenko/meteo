@@ -11,20 +11,32 @@ const levelStep = 6000;
 const LevelFilter = ({ onLevelFilterChange }: Props) => {
   const [filterValue, setFilterValue] =
     useState<[number, number]>(levelFilterRange);
+  const [isDragging, setIsDragging] = useState(false);
   const ref = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     const hanldeApplyFilterChange = () => {
+      if (!isDragging) return;
       onLevelFilterChange(filterValue);
+      setIsDragging(false);
     };
+    const handlePointerDown = () => setIsDragging(true);
     const slider = ref.current;
 
-    slider?.addEventListener("mouseup", hanldeApplyFilterChange);
+    slider?.addEventListener("pointerdown", handlePointerDown);
+
+    if (isDragging) {
+      document?.addEventListener("pointerup", hanldeApplyFilterChange);
+    }
 
     return () => {
-      slider?.removeEventListener("mouseup", hanldeApplyFilterChange);
+      slider?.removeEventListener("pointerdown", handlePointerDown);
+
+      if (isDragging) {
+        document?.removeEventListener("pointerup", hanldeApplyFilterChange);
+      }
     };
-  }, [filterValue, onLevelFilterChange]);
+  }, [filterValue, onLevelFilterChange, isDragging]);
 
   return (
     <Box display="flex" flexDirection="column" gap={1} my={1}>
