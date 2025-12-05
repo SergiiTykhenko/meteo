@@ -9,8 +9,8 @@
   "scripts": {
     "dev": "nodemon --watch server --exec tsx server/index.ts",
     "build": "npm run build:client && npm run build:server && npm run build:entry-server",
-    "build:client": "vite build --outDir dist/client",
-    "build:entry-server": "vite build --ssr src/entry-server.tsx --outDir dist/entry-server",
+    "build:client": "vite build --outDir dist/client --minify false",
+    "build:entry-server": "vite build --ssr src/entry-server.tsx --outDir dist/entry-server --minify false",
     "build:server": "tsup",
     "start": "cross-env NODE_ENV=production node dist/server/index.js",
     "test": "vitest run",
