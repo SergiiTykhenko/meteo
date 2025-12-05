@@ -1,6 +1,6 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import { getCachedData, cacheData } from "./cache.js";
-import type { AirSigmetFeature, ISigmetFeature } from "../../schemas.js";
+import { getCachedData, cacheData } from "./cache";
+import type { AirSigmetFeature, ISigmetFeature } from "../../schemas";
 
 const mockISigmetFeature = {
   type: "Feature" as const,

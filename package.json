@@ -11,7 +11,7 @@
     "build": "npm run build:client && npm run build:server && npm run build:entry-server",
     "build:client": "vite build --outDir dist/client",
     "build:entry-server": "vite build --ssr src/entry-server.tsx --outDir dist/entry-server",
-    "build:server": "tsc -p tsconfig.node.json",
+    "build:server": "tsup",
     "start": "cross-env NODE_ENV=production node dist/server/index.js",
     "test": "vitest run",
     "prepare": "husky"
@@ -56,6 +56,7 @@
     "nodemon": "^3.1.11",
     "supertest": "^7.0.0",
     "ts-node": "^10.9.2",
+    "tsup": "^8.5.1",
     "tsx": "^4.21.0",
     "typescript": "~5.9.3",
     "typescript-eslint": "^8.46.4",

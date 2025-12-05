@@ -1,5 +1,5 @@
 import sha1 from "sha1";
-import { AirSigmetProperties, ISigmetProperties } from "../schemas.js";
+import { AirSigmetProperties, ISigmetProperties } from "../schemas";
 
 export const generateHashId = ({
   icaoId,

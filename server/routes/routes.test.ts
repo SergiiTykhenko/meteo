@@ -16,7 +16,7 @@ vi.mock("../schemas", () => {
 });
 
 const createApp = async () => {
-  const routesModule = await import("./routes.js");
+  const routesModule = await import("./routes");
   const router = routesModule.default;
 
   const app = express();
@@ -29,7 +29,7 @@ describe("API routes", () => {
   beforeEach(async () => {
     vi.resetAllMocks();
 
-    const cacheModule = await import("../utils/cache/cache.js");
+    const cacheModule = await import("../utils/cache/cache");
     if (typeof cacheModule.resetCache === "function") {
       cacheModule.resetCache();
     }

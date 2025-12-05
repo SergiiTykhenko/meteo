@@ -1,6 +1,6 @@
 import express from "express";
 import fs from "node:fs/promises";
-import routes from "./routes/routes.js";
+import routes from "./routes/routes";
 
 const isProduction = process.env.NODE_ENV === "production";
 const port = process.env.PORT || 5173;

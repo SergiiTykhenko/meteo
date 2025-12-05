@@ -1,4 +1,4 @@
-import type { ISigmetFeature, AirSigmetFeature } from "../../schemas.js";
+import type { ISigmetFeature, AirSigmetFeature } from "../../schemas";
 
 interface Cache {
   initialisedAt: number | null;
