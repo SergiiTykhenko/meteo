@@ -43,6 +43,7 @@ app.use("*all", async (req, res, next) => {
   if (path.includes(".") && !path.endsWith("/") && path !== "/") {
     return next();
   }
+
   try {
     const url = req.originalUrl.replace(base, "");
 
