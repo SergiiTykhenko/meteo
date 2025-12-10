@@ -2,9 +2,11 @@ import express from "express";
 import fs from "node:fs/promises";
 import routes from "./routes/routes";
 
-const isProduction = process.env.NODE_ENV === "production";
+const mode = process.env.NODE_ENV || "development";
 const port = process.env.PORT || 5173;
 const base = process.env.BASE || "/";
+
+const isProduction = mode === "production";
 
 const templateHtml = isProduction
   ? await fs.readFile("./dist/client/index.html", "utf-8")
