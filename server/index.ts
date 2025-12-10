@@ -13,6 +13,7 @@ const templateHtml = isProduction
 const app = express();
 
 let vite: import("vite").ViteDevServer | undefined;
+
 if (!isProduction) {
   const { createServer } = await import("vite");
   vite = await createServer({
