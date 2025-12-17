@@ -25,7 +25,10 @@ const getUrl = (type: DataType, filters: Filters) => {
   }`;
 };
 
-const fetchWeatherFeatures = async (type: DataType, filters: Filters) => {
+export const fetchWeatherFeatures = async (
+  type: DataType,
+  filters: Filters = {}
+) => {
   const cacheKey = JSON.stringify({ type, ...filters });
 
   const cachedData = getCachedData(cacheKey);

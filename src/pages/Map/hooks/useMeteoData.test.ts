@@ -35,7 +35,18 @@ describe("useMeteoData", () => {
     vi.restoreAllMocks();
   });
 
-  it("should fetch data on mount", async () => {
+  it("should not fetch data on mount if initialMeteoData is provided", async () => {
+    const { result } = renderHook(() =>
+      useMeteoData({
+        isigmet: { type: "FeatureCollection", features: [] },
+        airsigmet: { type: "FeatureCollection", features: [] },
+      })
+    );
+    expect(result.current.isLoading).toBe(false);
+    expect(globalThis.fetch).not.toHaveBeenCalled();
+  });
+
+  it("should fetch data on mount if initialMeteoData is not provided", async () => {
     const mockIsigmetData: ISigmetFeatureCollection = {
       type: "FeatureCollection",
       features: [
@@ -319,15 +330,5 @@ describe("useMeteoData", () => {
     expect(lastIsigmetCall).toContain("levelFrom=12000");
     expect(lastIsigmetCall).toContain("levelTo=24000");
     expect(lastIsigmetCall).toContain("hoursChange=3");
-  });
-
-  it("should return empty arrays on initial render", () => {
-    (globalThis.fetch as ReturnType<typeof vi.fn>).mockImplementation(
-      () => new Promise(() => {})
-    );
-
-    const { result } = renderHook(() => useMeteoData());
-
-    expect(result.current.meteoData).toEqual(null);
   });
 });

@@ -4,7 +4,7 @@ import { Box, CircularProgress, Backdrop } from "@mui/material";
 import type { AirSigmetFeature, Properties, ISigmetFeature } from "@/schemas";
 import Details from "./components/Details/Details";
 import Filters, { type VisibleLayers } from "./components/Filters/Filters";
-import useMeteoData from "./hooks/useMeteoData";
+import useMeteoData, { type MeteoData } from "./hooks/useMeteoData";
 import Layers from "./components/Layers/Layers";
 import { mapStyleUrl, initialCenter } from "./consts";
 import "maplibre-gl/dist/maplibre-gl.css";
@@ -16,8 +16,13 @@ interface LayerDetails {
   properties: Properties;
 }
 
-const Map = () => {
-  const { meteoData, isLoading, handleFiltersChange } = useMeteoData();
+interface Props {
+  initialMeteoData: MeteoData;
+}
+
+const Map = ({ initialMeteoData }: Props) => {
+  const { meteoData, isLoading, handleFiltersChange } =
+    useMeteoData(initialMeteoData);
   const [selectedLayer, setSelectedLayer] = useState<LayerDetails | null>(null);
 
   const [visibleLayers, setVisibleLayers] = useState<VisibleLayers>({

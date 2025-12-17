@@ -47,11 +47,11 @@ const fetchAirsigmetData = async (filtersQuery?: string) => {
   return result.data;
 };
 
-const useMeteoData = () => {
+const useMeteoData = (initialData: MeteoData | null = null) => {
   const addSnackbar = useSnackbars();
 
   const fetchData = useCallback(
-    async (_prevState: MeteoData | null, filtersQuery?: string) => {
+    async (_prevState: MeteoData | null, filtersQuery: string = "") => {
       try {
         const [isigmetData, airsigmetData] = await Promise.all([
           fetchIsigmetData(filtersQuery),
@@ -77,9 +77,11 @@ const useMeteoData = () => {
   const [meteoData, handleFetchData, isLoading] = useActionState<
     MeteoData | null,
     string
-  >(fetchData, null);
+  >(fetchData, initialData);
 
-  useEffect(() => startTransition(() => handleFetchData("")), []);
+  useEffect(() => {
+    if (!initialData) startTransition(() => handleFetchData(""));
+  }, []);
 
   const handleFiltersChange = useCallback(
     (filters: Partial<FiltersType>) => {
