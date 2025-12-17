@@ -48,7 +48,12 @@ export const ISigmetGeoJSONSchema = z.object({
 
 export type ISigmetGeoJSON = z.infer<typeof ISigmetGeoJSONSchema>;
 export type ISigmetFeature = z.infer<typeof ISigmetFeatureSchema>;
+export type ISigmetFeatureWithId = ISigmetFeature & { id: string };
 export type ISigmetProperties = z.infer<typeof ISigmetPropertiesSchema>;
+export type ISigmetFeatureCollection = {
+  type: "FeatureCollection";
+  features: ISigmetFeatureWithId[];
+};
 
 const AirSigmetPropertiesSchema = z.object({
   icaoId: z.string().nullish(),
@@ -73,13 +78,22 @@ const AirSigmetFeatureSchema = z.object({
   geometry: GeometrySchema,
 });
 
+export const AirSigmetFeatureWithIdSchema = AirSigmetFeatureSchema.extend({
+  id: z.string(),
+});
+
 export const AirSigmetGeoJSONSchema = z.object({
   features: z.array(AirSigmetFeatureSchema),
 });
 
 export type AirSigmetGeoJSON = z.infer<typeof AirSigmetGeoJSONSchema>;
 export type AirSigmetFeature = z.infer<typeof AirSigmetFeatureSchema>;
+export type AirSigmetFeatureWithId = AirSigmetFeature & { id: string };
 export type AirSigmetProperties = z.infer<typeof AirSigmetPropertiesSchema>;
+export type AirSigmetFeatureCollection = {
+  type: "FeatureCollection";
+  features: AirSigmetFeatureWithId[];
+};
 
 export const schemaByType = {
   isigmet: ISigmetGeoJSONSchema,

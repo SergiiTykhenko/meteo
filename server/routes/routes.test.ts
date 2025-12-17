@@ -15,6 +15,15 @@ vi.mock("../schemas", () => {
   };
 });
 
+vi.mock("../utils/cache", () => ({
+  getCachedData: vi.fn().mockResolvedValue(null),
+  cacheData: vi.fn().mockResolvedValue("OK"),
+}));
+
+const mockFetch = vi.fn();
+
+vi.stubGlobal("fetch", mockFetch);
+
 const createApp = async () => {
   const routesModule = await import("./routes");
   const router = routesModule.default;
@@ -28,25 +37,32 @@ const createApp = async () => {
 describe("API routes", () => {
   beforeEach(async () => {
     vi.resetAllMocks();
+    mockFetch.mockClear();
 
-    const cacheModule = await import("../utils/cache/cache");
-    if (typeof cacheModule.resetCache === "function") {
-      cacheModule.resetCache();
-    }
+    const cacheModule = await import("../utils/cache");
+    vi.mocked(cacheModule.getCachedData).mockResolvedValue(null);
+    vi.mocked(cacheModule.cacheData).mockResolvedValue("OK");
   });
 
   it("returns data for /api/isigmet", async () => {
     const featuresCollection = {
       type: "FeatureCollection",
-      features: [{ properties: { rawSigmet: "SIGMET-1" } }],
+      features: [
+        {
+          type: "Feature",
+          properties: { rawSigmet: "SIGMET-1" },
+          geometry: {
+            type: "Polygon",
+            coordinates: [[[0, 0]]],
+          },
+        },
+      ],
     };
 
-    (globalThis as unknown as { fetch: unknown }).fetch = vi
-      .fn()
-      .mockResolvedValue({
-        ok: true,
-        json: vi.fn().mockResolvedValue(featuresCollection),
-      });
+    mockFetch.mockResolvedValue({
+      ok: true,
+      json: vi.fn().mockResolvedValue(featuresCollection),
+    });
 
     const app = await createApp();
 
@@ -54,24 +70,33 @@ describe("API routes", () => {
 
     expect(res.status).toBe(200);
     expect(res.body.data.type).toBe("FeatureCollection");
-    expect(res.body.data.features[0]).toMatchObject(
-      featuresCollection.features[0]
-    );
-    expect(global.fetch).toHaveBeenCalledTimes(1);
+    expect(res.body.data.features[0]).toMatchObject({
+      type: "Feature",
+      properties: featuresCollection.features[0].properties,
+      geometry: featuresCollection.features[0].geometry,
+    });
+    expect(res.body.data.features[0]).toHaveProperty("id");
+    expect(mockFetch).toHaveBeenCalledTimes(1);
   });
 
   it("returns data for /api/airsigmet", async () => {
     const featuresCollection = {
-      type: "FeatureCollection",
-      features: [{ properties: { rawSigmet: "AIRSIGMET-1" } }],
+      features: [
+        {
+          type: "Feature",
+          properties: { rawSigmet: "AIRSIGMET-1" },
+          geometry: {
+            type: "Polygon",
+            coordinates: [[[0, 0]]],
+          },
+        },
+      ],
     };
 
-    (globalThis as unknown as { fetch: unknown }).fetch = vi
-      .fn()
-      .mockResolvedValue({
-        ok: true,
-        json: vi.fn().mockResolvedValue(featuresCollection),
-      });
+    mockFetch.mockResolvedValue({
+      ok: true,
+      json: vi.fn().mockResolvedValue(featuresCollection),
+    });
 
     const app = await createApp();
 
@@ -79,19 +104,20 @@ describe("API routes", () => {
 
     expect(res.status).toBe(200);
     expect(res.body.data.type).toBe("FeatureCollection");
-    expect(res.body.data.features[0]).toMatchObject(
-      featuresCollection.features[0]
-    );
-    expect(global.fetch).toHaveBeenCalledTimes(1);
+    expect(res.body.data.features[0]).toMatchObject({
+      type: "Feature",
+      properties: featuresCollection.features[0].properties,
+      geometry: featuresCollection.features[0].geometry,
+    });
+    expect(res.body.data.features[0]).toHaveProperty("id");
+    expect(mockFetch).toHaveBeenCalledTimes(1);
   });
 
   it("returns 500 when upstream fetch fails", async () => {
-    (globalThis as unknown as { fetch: unknown }).fetch = vi
-      .fn()
-      .mockResolvedValue({
-        ok: false,
-        json: vi.fn(),
-      });
+    mockFetch.mockResolvedValue({
+      ok: false,
+      json: vi.fn(),
+    });
 
     const app = await createApp();
 
@@ -104,16 +130,31 @@ describe("API routes", () => {
 
   it("fetches multiple levels when levelFrom and levelTo are provided", async () => {
     const features = [
-      { properties: { rawSigmet: "SIGMET-1" } },
-      { properties: { rawSigmet: "SIGMET-2" } },
+      {
+        type: "Feature",
+        properties: { rawSigmet: "SIGMET-1" },
+        geometry: {
+          type: "Polygon",
+          coordinates: [[[0, 0]]],
+        },
+      },
+      {
+        type: "Feature",
+        properties: { rawSigmet: "SIGMET-2" },
+        geometry: {
+          type: "Polygon",
+          coordinates: [[[1, 1]]],
+        },
+      },
     ];
 
-    (globalThis as unknown as { fetch: unknown }).fetch = vi
-      .fn()
-      .mockResolvedValue({
-        ok: true,
-        json: vi.fn().mockResolvedValue({ features }),
-      });
+    mockFetch.mockResolvedValue({
+      ok: true,
+      json: vi.fn().mockResolvedValue({
+        type: "FeatureCollection",
+        features,
+      }),
+    });
 
     const app = await createApp();
 
@@ -123,7 +164,9 @@ describe("API routes", () => {
 
     expect(res.status).toBe(200);
     expect(res.body).toHaveProperty("data");
+    expect(res.body.data.type).toBe("FeatureCollection");
+    expect(Array.isArray(res.body.data.features)).toBe(true);
 
-    expect(global.fetch).toHaveBeenCalledTimes(2);
+    expect(mockFetch).toHaveBeenCalledTimes(2);
   });
 });

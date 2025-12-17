@@ -1,14 +1,14 @@
 import { StrictMode } from "react";
 import { renderToString } from "react-dom/server";
 import App from "./App";
-import { fetchWeatherFeatures } from "../server/routes/routes";
+import { fetchMeteoData } from "../server/routes/routes";
 
-const isigmetFeatures = await fetchWeatherFeatures("isigmet");
-const airsigmetFeatures = await fetchWeatherFeatures("airsigmet");
+const isigmetMeteoData = await fetchMeteoData("isigmet");
+const airsigmetMeteoData = await fetchMeteoData("airsigmet");
 
 const meteoData = {
-  isigmet: { type: "FeatureCollection", features: isigmetFeatures },
-  airsigmet: { type: "FeatureCollection", features: airsigmetFeatures },
+  isigmet: isigmetMeteoData,
+  airsigmet: airsigmetMeteoData,
 };
 
 const initialData = {

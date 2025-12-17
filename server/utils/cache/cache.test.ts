@@ -1,171 +1,57 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import { getCachedData, cacheData } from "./cache";
-import type { AirSigmetFeature, ISigmetFeature } from "../../schemas";
+import { getCachedData, cacheData } from "./index";
+import type { ISigmetFeatureWithId } from "../../schemas";
 
-const mockISigmetFeature = {
-  type: "Feature" as const,
-  properties: { rawSigmet: "SIGMET-1" },
-  geometry: {
-    type: "Polygon" as const,
-    coordinates: [[[0, 0]]],
+const mockISigmetFeatures: ISigmetFeatureWithId[] = [
+  {
+    id: "1",
+    type: "Feature" as const,
+    properties: { rawSigmet: "SIGMET-1" },
+    geometry: {
+      type: "Polygon" as const,
+      coordinates: [[[0, 0]]],
+    },
   },
-} as ISigmetFeature;
+];
 
-const mockAirSigmetFeature = {
-  type: "Feature" as const,
-  properties: { rawSigmet: "AIRSIGMET-1" },
-  geometry: {
-    type: "Polygon" as const,
-    coordinates: [[[0, 0]]],
-  },
-} as AirSigmetFeature;
+const { mockGet, mockSet } = vi.hoisted(() => ({
+  mockGet: vi.fn(),
+  mockSet: vi.fn(),
+}));
+
+vi.mock("redis", () => ({
+  createClient: vi.fn(() => ({
+    get: mockGet,
+    set: mockSet,
+    connect: vi.fn(),
+  })),
+}));
 
 describe("cache utility", () => {
   beforeEach(() => {
-    const originalDateNow = Date.now;
-    const futureTime = originalDateNow() + 2 * 60 * 60 * 1000; // 2 hours in future
-    Date.now = vi.fn(() => futureTime);
-
-    getCachedData("expire-key");
-
-    Date.now = originalDateNow;
+    mockGet.mockClear();
+    mockSet.mockClear();
   });
 
-  it("should return null when cache is not initialized", () => {
-    const result = getCachedData("test-key");
-    expect(result).toBeNull();
+  it("should call redis get method with the correct key", async () => {
+    const key = "test-key";
+
+    await getCachedData(key);
+
+    expect(mockGet).toHaveBeenCalledWith(key);
   });
 
-  it("should return null when cache key does not exist", async () => {
-    cacheData("existing-key", [mockISigmetFeature]);
+  it("should call set method with the correct key and data", async () => {
+    const key = "test-key";
 
-    const result = getCachedData("non-existent-key");
-    expect(result).toBeNull();
-  });
+    await cacheData(key, mockISigmetFeatures);
 
-  it("should return cached data when it exists and is not expired", () => {
-    const cacheKey = "test-key";
-    const testData = [mockISigmetFeature];
-
-    getCachedData("init-key");
-
-    cacheData(cacheKey, testData);
-
-    const result = getCachedData(cacheKey);
-
-    expect(result).toEqual(testData);
-  });
-
-  it("should cache and retrieve ISigmetFeature data", () => {
-    const cacheKey = "isigmet-key";
-    const testData = [mockISigmetFeature];
-
-    getCachedData("init-key");
-    cacheData(cacheKey, testData);
-
-    const result = getCachedData(cacheKey);
-    expect(result).toEqual(testData);
-  });
-
-  it("should cache and retrieve AirSigmetFeature data", () => {
-    const cacheKey = "airsigmet-key";
-    const testData = [mockAirSigmetFeature];
-
-    getCachedData("init-key");
-    cacheData(cacheKey, testData);
-
-    const result = getCachedData(cacheKey);
-    expect(result).toEqual(testData);
-  });
-
-  it("should handle multiple cache keys independently", () => {
-    const key1 = "key-1";
-    const key2 = "key-2";
-    const data1 = [mockISigmetFeature];
-    const data2 = [mockAirSigmetFeature];
-
-    getCachedData("init-key");
-    cacheData(key1, data1);
-    cacheData(key2, data2);
-
-    expect(getCachedData(key1)).toEqual(data1);
-    expect(getCachedData(key2)).toEqual(data2);
-  });
-
-  it("should overwrite existing cache entry", () => {
-    const cacheKey = "test-key";
-    const initialData = [mockISigmetFeature];
-    const updatedData = [mockAirSigmetFeature];
-
-    getCachedData("init-key");
-    cacheData(cacheKey, initialData);
-    expect(getCachedData(cacheKey)).toEqual(initialData);
-
-    cacheData(cacheKey, updatedData);
-    expect(getCachedData(cacheKey)).toEqual(updatedData);
-  });
-
-  it("should clear cache when expired", () => {
-    vi.useFakeTimers();
-
-    const cacheKey = "expired-test-key-unique-2";
-    const testData = [mockISigmetFeature];
-
-    vi.setSystemTime(1000000000);
-
-    getCachedData("init-expire-key-unique-2");
-    cacheData(cacheKey, testData);
-
-    expect(getCachedData(cacheKey)).toEqual(testData);
-
-    vi.advanceTimersByTime(2 * 60 * 60 * 1000);
-
-    const result = getCachedData(cacheKey);
-
-    expect(result).toBeNull();
-
-    const result2 = getCachedData("new-key-after-expiry-2");
-    expect(result2).toBeNull();
-
-    vi.useRealTimers();
-  });
-
-  it("should handle empty arrays in cache", () => {
-    const cacheKey = "empty-key";
-    const emptyData: (typeof mockISigmetFeature)[] = [];
-
-    getCachedData("init-key");
-    cacheData(cacheKey, emptyData);
-
-    const result = getCachedData(cacheKey);
-    expect(result).toEqual([]);
-    expect(Array.isArray(result)).toBe(true);
-  });
-
-  it("should handle large arrays in cache", () => {
-    const cacheKey = "large-key";
-    const largeData = Array.from({ length: 100 }, (_, i) => ({
-      ...mockISigmetFeature,
-      properties: { rawSigmet: `SIGMET-${i}` },
-    }));
-
-    getCachedData("init-key");
-    cacheData(cacheKey, largeData);
-
-    const result = getCachedData(cacheKey);
-    expect(result).toHaveLength(100);
-    expect(result).toEqual(largeData);
-  });
-
-  it("should initialize cache timestamp on first getCachedData call after expiry", () => {
-    const result1 = getCachedData("init-key-2");
-    expect(result1).toBeNull();
-
-    const result2 = getCachedData("any-key-2");
-    expect(result2).toBeNull();
-
-    cacheData("any-key-2", [mockISigmetFeature]);
-    const result3 = getCachedData("any-key-2");
-    expect(result3).toEqual([mockISigmetFeature]);
+    expect(mockSet).toHaveBeenCalledWith(
+      key,
+      JSON.stringify(mockISigmetFeatures),
+      {
+        expiration: { type: "EX", value: 3600 },
+      }
+    );
   });
 });

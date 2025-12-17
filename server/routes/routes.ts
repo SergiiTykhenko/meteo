@@ -2,8 +2,12 @@ import { Router, type Request } from "express";
 import _ from "lodash";
 import { addHours } from "date-fns";
 import { generateHashId } from "./utils";
-import { schemaByType } from "../schemas";
-import { cacheData, getCachedData } from "../utils/cache/cache";
+import {
+  AirSigmetFeatureCollection,
+  ISigmetFeatureCollection,
+  schemaByType,
+} from "../schemas";
+import { cacheData, getCachedData } from "../utils/cache";
 
 const router = Router();
 
@@ -25,13 +29,10 @@ const getUrl = (type: DataType, filters: Filters) => {
   }`;
 };
 
-export const fetchWeatherFeatures = async (
-  type: DataType,
-  filters: Filters = {}
-) => {
+const fetchWeatherFeatures = async (type: DataType, filters: Filters = {}) => {
   const cacheKey = JSON.stringify({ type, ...filters });
 
-  const cachedData = getCachedData(cacheKey);
+  const cachedData = await getCachedData(cacheKey);
 
   if (cachedData) {
     return cachedData;
@@ -83,8 +84,11 @@ const getLevelsToFetch = (levelFrom: string, levelTo: string) => {
   }, []);
 };
 
-const getMeteoData = async (req: Request, type: "isigmet" | "airsigmet") => {
-  const { levelFrom, levelTo, hoursChange } = req.query;
+export const fetchMeteoData = async (
+  type: DataType,
+  queryParams: Request["query"] = {}
+): Promise<ISigmetFeatureCollection | AirSigmetFeatureCollection> => {
+  const { levelFrom, levelTo, hoursChange } = queryParams;
 
   const filters: Filters = hoursChange
     ? { hoursChange: hoursChange.toString() }
@@ -121,7 +125,7 @@ const getMeteoData = async (req: Request, type: "isigmet" | "airsigmet") => {
 // routes
 router.get("/isigmet", async (req, res) => {
   try {
-    const data = await getMeteoData(req, "isigmet");
+    const data = await fetchMeteoData("isigmet", req.query);
 
     res.json({ data });
   } catch (error) {
@@ -133,7 +137,7 @@ router.get("/isigmet", async (req, res) => {
 
 router.get("/airsigmet", async (req, res) => {
   try {
-    const data = await getMeteoData(req, "airsigmet");
+    const data = await fetchMeteoData("airsigmet", req.query);
 
     res.json({ data });
   } catch (error) {
