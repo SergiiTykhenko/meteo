@@ -14,8 +14,10 @@
     "build:server": "tsup",
     "start": "cross-env NODE_ENV=production node dist/server/index.js",
     "test": "vitest run",
+    "lint": "eslint .",
     "prepare": "husky",
-    "redis:start": "docker-compose -f ./docker/redis-docker-compose.yml --env-file .env up"
+    "redis:start": "docker-compose -f ./docker/redis-docker-compose.yml --env-file .env up",
+    "typescript-check": "tsc --noEmit"
   },
   "dependencies": {
     "@emotion/react": "^11.14.0",
