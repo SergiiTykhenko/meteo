@@ -14,7 +14,9 @@
     "build:server": "tsup",
     "start": "cross-env NODE_ENV=production node dist/server/index.js",
     "test": "vitest run",
-    "prepare": "husky"
+    "prepare": "husky",
+    "lint": "eslint .",
+    "typescript-check": "tsc --noEmit"
   },
   "dependencies": {
     "@emotion/react": "^11.14.0",
