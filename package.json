@@ -16,7 +16,13 @@
     "test": "vitest run",
     "prepare": "husky",
     "lint": "eslint .",
+    "lint-staged": "lint-staged",
     "typescript-check": "tsc --noEmit"
+  },
+  "lint-staged": {
+    "*.{js,ts,jsx,tsx}": [
+      "eslint --fix"
+    ]
   },
   "dependencies": {
     "@emotion/react": "^11.14.0",
@@ -55,6 +61,7 @@
     "globals": "^16.5.0",
     "husky": "^9.1.7",
     "jsdom": "^25.0.1",
+    "lint-staged": "^16.2.7",
     "nodemon": "^3.1.11",
     "supertest": "^7.0.0",
     "ts-node": "^10.9.2",
