@@ -1,9 +1,10 @@
-name: Testing
+name: CI
 
 on: pull_request
 
 jobs:
   unit-test:
+    name: Testing / Unit Test
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v6
@@ -15,6 +16,7 @@ jobs:
       - run: npm test
 
   lint:
+    name: Testing / Lint Staged
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v6
@@ -23,9 +25,10 @@ jobs:
           node-version: 20
           cache: "npm"
       - run: npm ci
-      - run: npm run lint
+      - run: npm run lint-staged
 
   typescript-check:
+    name: Testing / TypeScript Check
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v6
@@ -37,4 +40,6 @@ jobs:
       - run: npm run typescript-check
 
   build:
-    uses: ./.github/workflows/build.yml
+    name: Deployment
+    needs: [unit-test, lint, typescript-check]
+    uses: ./.github/workflows/deploy.yml
